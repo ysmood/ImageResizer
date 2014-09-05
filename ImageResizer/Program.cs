@@ -35,15 +35,19 @@ namespace ImageResizer
                 Directory.CreateDirectory(output_dir);
             }
 
-            var paths = glob(target_dir, "*.jpg");
+            var paths = glob(target_dir, new String[] { "*.jpg", "*.jpeg", "*.png", "*.gif" });
             int count = paths.Length;
            
             foreach (var path in paths)
             {
                 ThreadPool.QueueUserWorkItem((o) => {
-                    minify_img(path);
+                    minify_img(Path.GetFileName(path));
 
-                    Console.WriteLine("Converted: " + path);
+                    Console.WriteLine(
+                        "[{0,3}/{1,3}] {2}",
+                        paths.Length - count,
+                        paths.Length,
+                        path);
 
                     if (Interlocked.Decrement(ref count) == 0)
                     {
@@ -66,7 +70,7 @@ namespace ImageResizer
         string set_target_dir()
         {
             var fbd = new FolderBrowserDialog();
-            fbd.Description = "Select a folder to batch convert.";
+            fbd.Description = "Please select a source folder for the batch task.";
             fbd.ShowNewFolderButton = false;
             fbd.SelectedPath = Environment.CurrentDirectory;
             if (fbd.ShowDialog() == DialogResult.OK)
@@ -75,11 +79,17 @@ namespace ImageResizer
                 return null;
         }
 
-        String[] glob(String path, String pattern)
+        String[] glob(String path, String[] patterns)
         {
-            return Directory.GetFiles(path, pattern, SearchOption.AllDirectories).Select(
-                s => Path.GetFileName(s)
-            ).ToArray();       
+            var list = new List<string>();
+            foreach (var pattern in patterns)
+            {
+                foreach (var p in Directory.GetFiles(path, pattern, SearchOption.AllDirectories))
+                {
+                    list.Add(p);
+                }
+            }
+            return list.ToArray();       
         }
 
         void minify_img(string path)
