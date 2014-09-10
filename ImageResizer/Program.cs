@@ -15,10 +15,21 @@ namespace ImageResizer
         [STAThread]
         static void Main(string[] args)
         {
-            new Program();
+            switch (args.Length)
+            {
+                case 1:
+                    new Program(Convert.ToInt32(args[0]));
+                    break;
+                case 2:
+                    new Program(Convert.ToInt32(args[0]), Convert.ToInt32(args[0]));
+                    break;
+                default:
+                    new Program();
+                    break;
+            }
         }
 
-        Program(float max_width = 2000, long quality = 90L)
+        Program(float max_width = 1500, long quality = 90L)
         {
             target_dir = set_target_dir();
 
