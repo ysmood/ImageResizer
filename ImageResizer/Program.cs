@@ -15,26 +15,12 @@ namespace ImageResizer
         [STAThread]
         static void Main(string[] args)
         {
-            switch (args.Length)
-            {
-                case 1:
-                    new Program(Convert.ToInt32(args[0]));
-                    break;
-                case 2:
-                    new Program(Convert.ToInt32(args[0]), Convert.ToInt32(args[0]));
-                    break;
-                default:
-                    new Program();
-                    break;
-            }
+            new Program();
         }
 
-        Program(float max_width = 1500, long quality = 90L)
+        Program()
         {
-            target_dir = set_target_dir();
-
-            this.max_width = max_width;
-            this.quality = quality;
+            set_options();
 
             if (target_dir == null)
                 return;
@@ -78,16 +64,20 @@ namespace ImageResizer
         float max_width;
         long quality;
 
-        string set_target_dir()
+        void set_options()
         {
+            var dlg = new Options();
+            dlg.ShowDialog();
+
+            max_width = dlg.max_width;
+            quality = dlg.quality;
+
             var fbd = new FolderBrowserDialog();
             fbd.Description = "Please select a source folder for the batch task.";
             fbd.ShowNewFolderButton = false;
             fbd.SelectedPath = Environment.CurrentDirectory;
             if (fbd.ShowDialog() == DialogResult.OK)
-                return fbd.SelectedPath;
-            else
-                return null;
+                target_dir = fbd.SelectedPath;
         }
 
         String[] glob(String path, String[] patterns)
